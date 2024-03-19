@@ -1,0 +1,118 @@
+nav {
+  display: flex;
+  background-color: #008080;
+  height: 80px;
+  width: 100vw;
+  align-self: center;
+  justify-content: space-between;
+  position: sticky;
+  border-radius: 10px;
+}
+
+.child1,
+.child2,
+.child3 {
+  height: 100%;
+  width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  margin: 3.5px;
+}
+
+.child1 {
+  margin-left: 30px;
+}
+.child2 {
+  width: auto;
+  padding: 2px;
+  font-size: 32px;
+}
+
+.Link {
+  text-decoration: none;
+}
+.child3 {
+  margin-right: 50px;
+  justify-content: space-between;
+}
+.child1 img,
+.child3 img {
+  width: 40px;
+  margin-right: 20px;
+}
+
+.profile {
+  background-color: rgb(175, 132, 118);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: absolute;
+  height: 400px;
+  width: 400px;
+  border-radius: 10px;
+  top: 25vh;
+  right: 38vw;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  backdrop-filter: blur(5px);
+  /* cursor: default; */
+}
+
+.first {
+  height: 70%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  /* background-color: #fff; */
+}
+.first img {
+  width: 50%;
+  cursor: default;
+}
+.second {
+  height: 28%;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  font-size: 30px;
+}
+
+.display {
+  display: none;
+}
+
+.x {
+  position: absolute;
+  top: 5px;
+  right: 17px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 680px) {
+  .child2 {
+    font-size: 30px;
+  }
+}
+@media screen and (max-width: 560px) {
+  .child2 {
+    font-size: 20px;
+    text-align: center;
+    font-weight: 600;
+  }
+  .child1 img,
+  .child3 img {
+    width: 30px;
+    /* margin-left: 20px; */
+  }
+
+  .child3 {
+    margin-right: 10px;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .child2 {
+    font-size: 15px;
+  }
+}

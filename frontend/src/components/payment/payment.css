@@ -1,0 +1,24 @@
+.payment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 71.9vh;
+}
+
+.home-link {
+  width: 40%;
+  background-color: red;
+  height: 60px;
+  margin-bottom: 10px;
+}
+
+.myorders-link {
+  width: 40%;
+  background-color: red;
+  height: 60px;
+}
+
+.home-link .myorders-link {
+  text-decoration: none;
+}

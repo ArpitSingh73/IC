@@ -1,0 +1,19 @@
+.footer {
+  background-color: rgb(30, 30, 71);
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+}
+
+.footer div {
+  /* background-color: #fff; */
+  margin: 4px;
+  height: 30px;
+  width: 18%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+}
