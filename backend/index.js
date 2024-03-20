@@ -15,6 +15,8 @@ var app = express();
 var bodyParser = require("body-parser");
 connect(); 
 
+
+
 const Users = require("./models/users");
 const Events = require("./models/events");
 const Courses = require("./models/courses");
@@ -47,7 +49,7 @@ if (process.env.NODE_ENV === "production") {
 
 
 //
-//
+// signup route
 app.post("/signup", async (req, res) => {
   let success = false;
   let userExists = false;
@@ -80,7 +82,7 @@ app.post("/signup", async (req, res) => {
 });
 
 //
-//
+// login route
 app.post("/login", async (req, res) => {
   let success = false;
   let userExists = false;
@@ -110,7 +112,7 @@ app.post("/login", async (req, res) => {
 });
 
 //
-//
+// route to check if user exists or not
 app.get("/getuser", verifyUser, async (req, res) => {
   const _id = req.query.user_id;
   let success = false;
@@ -132,21 +134,21 @@ app.get("/getuser", verifyUser, async (req, res) => {
 });
 
 //
-//
+// route for fetching all courses 
 app.get("/allcourses", async (req, res) => {
   const allcourse = await Courses.find({});
   res.status(200).send(allcourse);
 });
 
 //
-//
+// route for fetching all events
 app.get("/allevents", async (req, res) => {
   const allevents = await Events.find({});
   res.status(200).send(allevents);
 });
 
 //
-//
+// route for fetching specific item
 app.get("/getproduct:id", async (req, res) => {
   //
   let _id = req.params.id.substring(1);
@@ -167,7 +169,7 @@ app.get("/getproduct:id", async (req, res) => {
 });
 
 //
-//
+// route for adding new product only by admin
 app.post("/admin/addproduct", verifyUser, isAdmin, async (req, res) => {
   let { name, type, teacher, price, registerDate } = req.body;
   let success = false;
@@ -206,7 +208,7 @@ app.post("/admin/addproduct", verifyUser, isAdmin, async (req, res) => {
 });
 
 //
-//
+// route for accessing all the orders ever placed by admin only
 app.get("/admin/placedorders", verifyUser, isAdmin, async (req, res) => {
   try {
     const _idArray = [];
@@ -249,7 +251,7 @@ app.get("/admin/placedorders", verifyUser, isAdmin, async (req, res) => {
 });
 
 //
-//
+// route for updating the existing product, only by admin
 app.post("/admin/update", verifyUser, isAdmin, async (req, res) => {
   let { _id, name, type, teacher, price, registerDate } = req.body;
   let success = false;
@@ -312,7 +314,7 @@ app.post("/admin/update", verifyUser, isAdmin, async (req, res) => {
 });
 
 //
-//
+// route for deleting existing product
 app.post("/admin/delete", verifyUser, isAdmin, async (req, res) => {
   let { _id } = req.body;
   let success = false;
@@ -340,7 +342,7 @@ app.post("/admin/delete", verifyUser, isAdmin, async (req, res) => {
 });
 
 //
-//
+// route for adding new admin
 app.post("/admin/add", verifyUser, isAdmin, async (req, res) => {
   let success = false;
   let userExists = false;
@@ -373,245 +375,208 @@ app.post("/admin/add", verifyUser, isAdmin, async (req, res) => {
 });
 
 //
-//
-// app.get("/admin/filter", async (req, res) => {
-  // // Get Today Start Date and End Date
-  // let startOfDay = new Date();
-  // startOfDay.setHours(0, 0, 0, 0);
-  // let endOfDay = new Date();
-  // endOfDay.setHours(23, 59, 59, 999);
-
-  // // Get Yesterday Start Date and End Date
-  // let startOfYesterday = new Date();
-  // startOfYesterday.setDate(startOfYesterday.getDate() - 1);
-  // startOfYesterday.setHours(0, 0, 0, 0);
-  // let endOfYesterday = new Date();
-  // endOfYesterday.setDate(endOfYesterday.getDate() - 1);
-  // endOfYesterday.setHours(23, 59, 59, 999);
-
-  // // Get Last Month Start Date and End Date
-  // let startOfPreviousMonth = new Date();
-  // startOfPreviousMonth.setMonth(startOfPreviousMonth.getMonth() - 1);
-  // startOfPreviousMonth.setDate(1);
-  // startOfPreviousMonth.setHours(0, 0, 0, 0);
-  // let endOfPreviousMonth = new Date();
-  // endOfPreviousMonth.setMonth(endOfPreviousMonth.getMonth() - 1);
-  // let lastDayOfPreviousMonth = new Date(
-  //   endOfPreviousMonth.getFullYear(),
-  //   endOfPreviousMonth.getMonth() + 1,
-  //   0
-  // );
-  // endOfPreviousMonth.setDate(lastDayOfPreviousMonth.getDate());
-  // endOfPreviousMonth.setHours(23, 59, 59, 999);
-
-  // 1 Year --->
-  //  const result = await Payment.aggregate([
-  //    {
-  //      $group: {
-  //        _id: { year: { $year:{} } },
-  //        count: { $sum: 1 },
-  //        user: { $push: "$user_id" },
-  //        product: { $push: "$prod_id" },
-  //      },
-  //    },
-  //  ]);
-
- 
-
-
-
-  // try {
+// route for filtering orders by today, one week , one month, one year and lifetime
+app.get("/admin/filter", async (req, res) => {
+  try {
     // one day --->
+    let duration = req.body.duration;
+    if (duration === "one day") {
+      var start = new Date();
+      start.setHours(0, 0, 0, 0);
+      var end = new Date();
+      end.setHours(23, 59, 59, 999);
 
-    // var start = new Date();
-    // start.setHours(0, 0, 0, 0);
-    // var end = new Date();
-    // end.setHours(23, 59, 59, 999);
+      const result = await Payment.find({
+        createdAt: { $gte: start, $lt: end },
+      });
 
-    // const result = await Payment.find({ createdAt: { $gte: start, $lt: end } });
+      const user_id = result[0]["user_id"];
+      const prod_id = result[0]["prod_id"];
 
-    // const user_id = result[0]["user_id"];
-    // const prod_id = result[0]["prod_id"];
+      const detail = {};
+      let prod = await Events.findById(prod_id);
+      if (prod) {
+        detail["product name"] = prod["name"];
+        detail["price"] = prod["price"];
+      }
+      prod = await Courses.findById(prod_id);
 
-    // const detail = {};
-    // let prod = await Events.findById(prod_id);
-    // if (prod) {
-    //   detail["product name"] = prod["name"];
-    //   detail["price"] = prod["price"];
-    // }
-    // prod = await Courses.findById(prod_id);
+      if (prod) {
+        detail["product name"] = prod["name"];
+        detail["price"] = prod["price"];
+      }
 
-    // if (prod) {
-    //   detail["product name"] = prod["name"];
-    //   detail["price"] = prod["price"];
-    // }
+      const user = await Users.findById(user_id);
+      console.log(user);
+      detail["user name"] = user["name"];
+      detail["email"] = user["email"];
 
-    // const user = await Users.findById(user_id);
-    // console.log(user)
-    // detail["user name"] = user["name"];
-    // detail["email"] = user["email"];
+      detail["razorpay_order_id"] = result[0]["razorpay_order_id"];
+      detail["razorpay_payment_id"] = result[0]["razorpay_payment_id"];
+      detail["orderTime"] = result[0]["createdAt"];
 
-    // detail["razorpay_order_id"] = result[0]["razorpay_order_id"];
-    // detail["razorpay_payment_id"] = result[0]["razorpay_payment_id"];
-    // detail["orderTime"] = result[0]["createdAt"]
-
+    }
     // one week --->
+    else if (duration === "one week") {
+       let week_1 = new Date(); // current date
+       let pastDate = week_1.getDate() - 7;
+       week_1.setDate(pastDate);
+       const result = await Payment.find({
+         createdAt: { $gte: week_1 },
+       });
 
-    // let week_1 = new Date(); // current date
-    // let pastDate = week_1.getDate() - 7;
-    // week_1.setDate(pastDate);
-    // const result = await Payment.find({
-    //   createdAt: { $gte: week_1 },
-    // });
+       let prodDetail = [];
 
-    // let prodDetail = [];
+       for (let info of result) {
+         let temp = {};
+         temp["user_id"] = info["user_id"];
+         temp["prod_id"] = info["prod_id"];
+         temp["razorpay_order_id"] = info["razorpay_order_id"];
+         temp["razorpay_payment_id"] = info["razorpay_payment_id"];
+         temp["orderTime"] = info["createdAt"];
+         prodDetail.push(temp);
+       }
 
-    // for (let info of result) {
-    //   let temp = {};
-    //   temp["user_id"] = info["user_id"];
-    //   temp["prod_id"] = info["prod_id"];
-    //   temp["razorpay_order_id"] = info["razorpay_order_id"];
-    //   temp["razorpay_payment_id"] = info["razorpay_payment_id"];
-    //   temp["orderTime"] = info["createdAt"];
-    //   prodDetail.push(temp);
-    // }
+       let allDetail = [];
 
-    // let allDetail = [];
+       for (let info of prodDetail) {
+         let temp = {};
+         const user_id = info["user_id"];
+         const prod_id = info["prod_id"];
 
-    // for (let info of prodDetail) {
-    //   let temp = {};
-    //   const user_id = info["user_id"];
-    //   const prod_id = info["prod_id"];
+         let prod = await Events.findById(prod_id);
+         if (prod) {
+           temp["product name"] = prod["name"];
+           temp["price"] = prod["price"];
+         }
+         prod = await Courses.findById(prod_id);
+         if (prod) {
+           temp["product name"] = prod["name"];
+           temp["price"] = prod["price"];
+         }
+         const user = await Users.findById(user_id);
+         temp["user name"] = user["name"];
+         temp["email"] = user["email"];
 
-    //   let prod = await Events.findById(prod_id);
-    //   if (prod) {
-    //     temp["product name"] = prod["name"];
-    //     temp["price"] = prod["price"];
-    //   }
-    //   prod = await Courses.findById(prod_id);
-    //   if (prod) {
-    //     temp["product name"] = prod["name"];
-    //     temp["price"] = prod["price"];
-    //   }
-    //   const user = await Users.findById(user_id);
-    //   temp["user name"] = user["name"];
-    //   temp["email"] = user["email"];
+         temp["razorpay_order_id"] = info["razorpay_order_id"];
+         temp["razorpay_payment_id"] = info["razorpay_payment_id"];
+         temp["orderTime"] = info["orderTime"];
 
-    //   temp["razorpay_order_id"] = info["razorpay_order_id"];
-    //   temp["razorpay_payment_id"] = info["razorpay_payment_id"];
-    //   temp["orderTime"] = info["orderTime"];
+         allDetail.push(temp);
+       }
 
-    //   allDetail.push(temp);
-    // }
+       // one month --->
+    } else if (duration === "one month") {
+      let month_1 = new Date(); // current date
 
-    // one month --->
-    // let month_1 = new Date(); // current date
+      let pastMonth = month_1.getDate() - 30;
+      month_1.setDate(pastMonth);
 
-    // let pastMonth = month_1.getDate() - 30;
-    // month_1.setDate(pastMonth);
+      const result = await Payment.find({
+        createdAt: { $gte: month_1 },
+      });
 
-    // const result = await Payment.find({
-    //   createdAt: { $gte: month_1 },
-    // });
+      let prodDetail = [];
 
-    // let prodDetail = [];
+      for (let info of result) {
+        let temp = {};
+        temp["user_id"] = info["user_id"];
+        temp["prod_id"] = info["prod_id"];
+        temp["razorpay_order_id"] = info["razorpay_order_id"];
+        temp["razorpay_payment_id"] = info["razorpay_payment_id"];
+        temp["orderTime"] = info["createdAt"];
+        prodDetail.push(temp);
+      }
 
-    // for (let info of result) {
-    //   let temp = {};
-    //   temp["user_id"] = info["user_id"];
-    //   temp["prod_id"] = info["prod_id"];
-    //   temp["razorpay_order_id"] = info["razorpay_order_id"];
-    //   temp["razorpay_payment_id"] = info["razorpay_payment_id"];
-    //   temp["orderTime"] = info["createdAt"];
-    //   prodDetail.push(temp);
-    // }
+      let allDetail = [];
 
-    // let allDetail = [];
+      for (let info of prodDetail) {
+        let temp = {};
+        const user_id = info["user_id"];
+        const prod_id = info["prod_id"];
 
-    // for (let info of prodDetail) {
-    //   let temp = {};
-    //   const user_id = info["user_id"];
-    //   const prod_id = info["prod_id"];
+        let prod = await Events.findById(prod_id);
+        if (prod) {
+          temp["product name"] = prod["name"];
+          temp["price"] = prod["price"];
+        }
+        prod = await Courses.findById(prod_id);
+        if (prod) {
+          temp["product name"] = prod["name"];
+          temp["price"] = prod["price"];
+        }
+        const user = await Users.findById(user_id);
+        temp["user name"] = user["name"];
+        temp["email"] = user["email"];
 
-    //   let prod = await Events.findById(prod_id);
-    //   if (prod) {
-    //     temp["product name"] = prod["name"];
-    //     temp["price"] = prod["price"];
-    //   }
-    //   prod = await Courses.findById(prod_id);
-    //   if (prod) {
-    //     temp["product name"] = prod["name"];
-    //     temp["price"] = prod["price"];
-    //   }
-    //   const user = await Users.findById(user_id);
-    //   temp["user name"] = user["name"];
-    //   temp["email"] = user["email"];
+        temp["razorpay_order_id"] = info["razorpay_order_id"];
+        temp["razorpay_payment_id"] = info["razorpay_payment_id"];
+        temp["orderTime"] = info["orderTime"];
 
-    //   temp["razorpay_order_id"] = info["razorpay_order_id"];
-    //   temp["razorpay_payment_id"] = info["razorpay_payment_id"];
-    //   temp["orderTime"] = info["orderTime"];
+        allDetail.push(temp);
+      }
 
-    //   allDetail.push(temp);
-    // }
+      // 1 Year --->
+    } else if (duration === "one year") {
+      const result = await Payment.aggregate([
+        {
+          $group: {
+            _id: { year: { $year: {} } },
+          },
+        },
+      ]);
 
-    // 1 Year --->
-    // const result = await Payment.aggregate([
-    //   {
-    //     $group: {
-    //       _id: { year: { $year: {} } },
-    //     },
-    //   }, 
-    // ]);
+      let prodDetail = [];
 
-    // let prodDetail = [];
+      for (let info of result) {
+        let temp = {};
+        temp["user_id"] = info["user_id"];
+        temp["prod_id"] = info["prod_id"];
+        temp["razorpay_order_id"] = info["razorpay_order_id"];
+        temp["razorpay_payment_id"] = info["razorpay_payment_id"];
+        temp["orderTime"] = info["createdAt"];
+        prodDetail.push(temp);
+      }
 
-    // for (let info of result) {
-    //   let temp = {};
-    //   temp["user_id"] = info["user_id"];
-    //   temp["prod_id"] = info["prod_id"];
-    //   temp["razorpay_order_id"] = info["razorpay_order_id"];
-    //   temp["razorpay_payment_id"] = info["razorpay_payment_id"];
-    //   temp["orderTime"] = info["createdAt"];
-    //   prodDetail.push(temp);
-    // }
+      let allDetail = [];
 
-    // let allDetail = [];
+      for (let info of prodDetail) {
+        let temp = {};
+        const user_id = info["user_id"];
+        const prod_id = info["prod_id"];
 
-    // for (let info of prodDetail) {
-    //   let temp = {};
-    //   const user_id = info["user_id"];
-    //   const prod_id = info["prod_id"];
+        let prod = await Events.findById(prod_id);
+        if (prod) {
+          temp["product name"] = prod["name"];
+          temp["price"] = prod["price"];
+        }
+        prod = await Courses.findById(prod_id);
+        if (prod) {
+          temp["product name"] = prod["name"];
+          temp["price"] = prod["price"];
+        }
+        const user = await Users.findById(user_id);
+        temp["user name"] = user["name"];
+        temp["email"] = user["email"];
 
-    //   let prod = await Events.findById(prod_id);
-    //   if (prod) {
-    //     temp["product name"] = prod["name"];
-    //     temp["price"] = prod["price"];
-    //   }
-    //   prod = await Courses.findById(prod_id);
-    //   if (prod) {
-    //     temp["product name"] = prod["name"];
-    //     temp["price"] = prod["price"];
-    //   }
-    //   const user = await Users.findById(user_id);
-    //   temp["user name"] = user["name"];
-    //   temp["email"] = user["email"];
+        temp["razorpay_order_id"] = info["razorpay_order_id"];
+        temp["razorpay_payment_id"] = info["razorpay_payment_id"];
+        temp["orderTime"] = info["orderTime"];
 
-    //   temp["razorpay_order_id"] = info["razorpay_order_id"];
-    //   temp["razorpay_payment_id"] = info["razorpay_payment_id"];
-    //   temp["orderTime"] = info["orderTime"];
+        allDetail.push(temp);
+      }
 
-    //   allDetail.push(temp);
-    // }
+      return res.json(result); 
+    }
 
-//     return res.json(result); 
-//   } catch (error) {
-//     console.log(error);
-//     return res.status(500).json({ error: "something went wrong" });
-//   } 
-// });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "something went wrong" });
+  } 
+});
 
 //
-//
+// route for buying a product 
 app.post("/buy:id", verifyUser, async (req, res) => {
   try {
     const instance = new Razorpay({
@@ -631,7 +596,7 @@ app.post("/buy:id", verifyUser, async (req, res) => {
 });
 
 //
-//
+// route for accesing all orders of a user
 app.get("/myorders", verifyUser, async (req, res) => {
   const user_id = req.query.user_id;
 
@@ -669,13 +634,13 @@ app.get("/myorders", verifyUser, async (req, res) => {
 });
 
 //
-//
+// routes for fetching api keys 
 app.get("/keys", async (req, res) => {
   res.status(200).json({ key: process.env.RAZOR_API_KEY });
 });
 
 //
-//
+// route for payement verification 
 app.post("/paymentverify", async (req, res) => {
   const { user_id, prod_id } = req.query;
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
